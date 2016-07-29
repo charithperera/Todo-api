@@ -28,6 +28,18 @@ app.get('/todos/:id', function(req, res) {
 	}	
 });
 
+app.delete('/todos/:id', function(req, res) {
+	var todoId = +req.params.id;
+	var matchedTodo = _.findWhere(todos, {id: todoId});
+
+	if (matchedTodo) {
+		todos = _.without(todos, matchedTodo);
+		res.json(matchedTodo);
+	} else {
+		res.status(404).json({"Error": "No todo with that ID found"});
+	}
+});
+
 app.post('/todos', function(req, res) {
 	var new_todo = req.body;
 	var new_todo = _.pick(new_todo, "description", "completed")
