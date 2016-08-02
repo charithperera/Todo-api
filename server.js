@@ -14,26 +14,47 @@ app.get('/', function(req, res) {
 });
 
 app.get('/todos', function(req, res) {
-	var query_params = req.query;
-	var filtered_todos = todos;
+	var query = req.query;
+	var where = {};
 
-	if (query_params.hasOwnProperty("completed") && query_params.completed === "true") {
-		filtered_todos = _.where(todos, {
-			completed: true
-		})
-	} else if (query_params.hasOwnProperty("completed") && query_params.completed === "false") {
-		filtered_todos = _.where(todos, {
-			completed: false
-		})
+	if (query.hasOwnProperty('completed') && query.completed === 'true') {
+		where.completed = true;
+	}
+	else if (query.hasOwnProperty('completed') && query.completed === 'false') {
+		where.completed = false
 	}
 
-	if (query_params.hasOwnProperty("q") && query_params.q.length > 0) {
-		filtered_todos = _.filter(filtered_todos, function(todo) {
-			return todo.description.toLowerCase().indexOf(query_params.q.toLowerCase()) > -1;
-		})
+	if ( query.hasOwnProperty('q') && query.q.length > 0) {
+		where.description = {
+			$like: '%' + query.q + '%'
+		}
 	}
 
-	res.json(filtered_todos);
+	db.todo.findAll({ where: where }).then(function(result) {
+		res.json(result);
+	}, function(e) {
+		res.status(500).send();
+	});
+
+	// var filtered_todos = todos;
+
+	// if (query_params.hasOwnProperty("completed") && query_params.completed === "true") {
+	// 	filtered_todos = _.where(todos, {
+	// 		completed: true
+	// 	})
+	// } else if (query_params.hasOwnProperty("completed") && query_params.completed === "false") {
+	// 	filtered_todos = _.where(todos, {
+	// 		completed: false
+	// 	})
+	// }
+
+	// if (query_params.hasOwnProperty("q") && query_params.q.length > 0) {
+	// 	filtered_todos = _.filter(filtered_todos, function(todo) {
+	// 		return todo.description.toLowerCase().indexOf(query_params.q.toLowerCase()) > -1;
+	// 	})
+	// }
+
+	// res.json(filtered_todos);
 });
 
 app.get('/todos/:id', function(req, res) {
